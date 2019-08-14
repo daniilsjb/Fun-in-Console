@@ -34,6 +34,7 @@ class Snake : public ConsoleGameEngine
 
 		timer = 0.0f;
 
+		srand(time(0));
 		apple = GenerateApple();
 
 		return true;
