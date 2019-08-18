@@ -5,7 +5,7 @@ class SpriteEditor : public ConsoleGameEngine
 	Sprite sprite;
 	int spriteWidth, spriteHeight;
 	int spriteHalfX, spriteHalfY;
-	std::wstring spriteName;
+	std::wstring sprToSave, sprToLoad;
 
 	int canvasWidth, canvasHeight;
 	int canvasCenterX, canvasCenterY;
@@ -15,8 +15,9 @@ class SpriteEditor : public ConsoleGameEngine
 
 	bool OnStart() override
 	{
-		//Set name of the file to be generated
-		spriteName = L"brick_wall.spr";
+		//Set names of the files to be generated and loaded
+		sprToSave = L"new.spr";
+		sprToLoad = L"new.spr";
 
 		//Set dimensions of the sprite to be drawn
 		spriteWidth = 16;
@@ -65,8 +66,8 @@ class SpriteEditor : public ConsoleGameEngine
 			{
 				sprite.SetColor(GetMouseX() - canvasCenterX + spriteHalfX, GetMouseY() - canvasCenterY + spriteHalfY, brushColor);
 			}
-			
 		}
+
 		if (GetKey(VK_LBUTTON).pressed || GetKey(VK_LBUTTON).released)
 		{
 			//If the mouse is within palette boundaries, change brush color
@@ -76,13 +77,13 @@ class SpriteEditor : public ConsoleGameEngine
 
 		if (GetKey(VK_LCONTROL).held && GetKey('S').pressed)
 		{
-			sprite.Save(spriteName);
+			sprite.Save(sprToSave);
 		}
 
 		if (GetKey(VK_LCONTROL).held && GetKey('L').pressed)
 		{
 			//Load sprite from file
-			Sprite result(spriteName);
+			Sprite result(sprToLoad);
 
 			//Carry on only if loaded sprite can fit into the canvas
 			if (result.GetWidth() > 0 && result.GetWidth() < canvasWidth && result.GetHeight() > 0 && result.GetHeight() < canvasHeight)
