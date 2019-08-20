@@ -176,6 +176,6 @@ class Snake : public ConsoleGameEngine
 int main()
 {
 	Snake demo;
-	if (demo.ConstructScreen(64, 32, 16, 16))
+	if (demo.ConstructScreen(48, 32, 16, 16))
 		demo.Start();
 }
