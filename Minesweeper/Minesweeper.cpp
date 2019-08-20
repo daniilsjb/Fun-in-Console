@@ -60,8 +60,8 @@ class Minesweeper : public ConsoleGameEngine
 		srand(time(0));
 
 		//Accumulate X and Y offsets to form outline between cells
-		int xOffset = 0;
-		int yOffset = 0;
+		int xOffset = 1;
+		int yOffset = 1;
 
 		//Draw the grid
 		for (int i = 0; i < FIELD_WIDTH; i++)
@@ -77,7 +77,7 @@ class Minesweeper : public ConsoleGameEngine
 
 				yOffset++;
 			}
-			yOffset = 0;
+			yOffset = 1;
 			xOffset++;
 		}
 
@@ -402,8 +402,8 @@ int main()
 {
 	//Screen dimensions are calculated based on provided configuration. In addition to the actual space required to fit each cell, it also
 	//includes space inbetween cells to form the outline
-	int screenWidth = (FIELD_WIDTH * CELL_WIDTH) + (FIELD_WIDTH - 1);
-	int screenHeight = (FIELD_HEIGHT * CELL_HEIGHT) + (FIELD_HEIGHT - 1);
+	int screenWidth = (FIELD_WIDTH * CELL_WIDTH) + (FIELD_WIDTH + 1);
+	int screenHeight = (FIELD_HEIGHT * CELL_HEIGHT) + (FIELD_HEIGHT + 1);
 
 	Minesweeper demo;
 	if (demo.ConstructScreen(screenWidth, screenHeight, 4, 4))

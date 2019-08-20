@@ -15,6 +15,8 @@ class SpriteEditor : public ConsoleGameEngine
 
 	bool OnStart() override
 	{
+		SetApplicationTitle(L"Sprite Editor");
+
 		//Set names of the files to be generated and loaded
 		sprToSave = L"new.spr";
 		sprToLoad = L"new.spr";
@@ -75,29 +77,26 @@ class SpriteEditor : public ConsoleGameEngine
 				brushColor = GetScreenColor(GetMouseX(), GetMouseY());
 		}
 
+		if (GetKey(VK_RIGHT).pressed)
+			MoveSpriteRight();
+
+		if (GetKey(VK_LEFT).pressed)
+			MoveSpriteLeft();
+
+		if (GetKey(VK_UP).pressed)
+			MoveSpriteUp();
+
+		if (GetKey(VK_DOWN).pressed)
+			MoveSpriteDown();
+
+		if (GetKey('M').pressed)
+			MirrorSprite();
+
 		if (GetKey(VK_LCONTROL).held && GetKey('S').pressed)
-		{
 			sprite.Save(sprToSave);
-		}
 
 		if (GetKey(VK_LCONTROL).held && GetKey('L').pressed)
-		{
-			//Load sprite from file
-			Sprite result(sprToLoad);
-
-			//Carry on only if loaded sprite can fit into the canvas
-			if (result.GetWidth() > 0 && result.GetWidth() < canvasWidth && result.GetHeight() > 0 && result.GetHeight() < canvasHeight)
-			{
-				//Update sprite information
-				spriteWidth = result.GetWidth();
-				spriteHeight = result.GetHeight();
-
-				spriteHalfX = (int)((float)spriteWidth / 2.0f + 0.5f);
-				spriteHalfY = (int)((float)spriteHeight / 2.0f + 0.5f);
-
-				sprite.Copy(result);
-			}
-		}
+			LoadSprite();
 
 		//Clear the canvas by filling each row with empty space
 		for (int i = 0; i < GetScreenHeight(); i++)
@@ -133,6 +132,101 @@ class SpriteEditor : public ConsoleGameEngine
 
 		return true;
 	}
+
+	void MoveSpriteRight()
+	{
+		for (int j = 0; j < spriteHeight; j++)
+		{
+			for (int i = spriteWidth - 1; i > 0; i--)
+			{
+				sprite.SetCharacter(i, j, sprite.GetCharacter(i - 1, j));
+				sprite.SetColor(i, j, sprite.GetColor(i - 1, j));
+			}
+
+			sprite.SetCharacter(0, j, BG_BLACK);
+			sprite.SetColor(0, j, BG_BLACK);
+		}
+	}
+
+	void MoveSpriteLeft()
+	{
+		for (int j = 0; j < spriteHeight; j++)
+		{
+			for (int i = 0; i < spriteWidth - 1; i++)
+			{
+				sprite.SetCharacter(i, j, sprite.GetCharacter(i + 1, j));
+				sprite.SetColor(i, j, sprite.GetColor(i + 1, j));
+			}
+
+			sprite.SetCharacter(spriteWidth - 1, j, BG_BLACK);
+			sprite.SetColor(spriteWidth - 1, j, BG_BLACK);
+		}
+	}
+
+	void MoveSpriteUp()
+	{
+		for (int i = 0; i < spriteWidth; i++)
+		{
+			for (int j = 0; j < spriteHeight - 1; j++)
+			{
+				sprite.SetCharacter(i, j, sprite.GetCharacter(i, j + 1));
+				sprite.SetColor(i, j, sprite.GetColor(i, j + 1));
+			}
+			sprite.SetCharacter(i, spriteHeight - 1, BG_BLACK);
+			sprite.SetColor(i, spriteHeight - 1, BG_BLACK);
+		}
+	}
+
+	void MoveSpriteDown()
+	{
+		for (int i = 0; i < spriteWidth; i++)
+		{
+			for (int j = spriteHeight - 1; j > 0; j--)
+			{
+				sprite.SetCharacter(i, j, sprite.GetCharacter(i, j - 1));
+				sprite.SetColor(i, j, sprite.GetColor(i, j - 1));
+			}
+			sprite.SetCharacter(i, 0, BG_BLACK);
+			sprite.SetColor(i, 0, BG_BLACK);
+		}
+	}
+
+	void MirrorSprite()
+	{
+		Sprite mirrored;
+		mirrored.Create(spriteWidth, spriteHeight);
+
+		for (int i = 0; i < spriteWidth; i++)
+		{
+			for (int j = 0; j < spriteHeight; j++)
+			{
+				mirrored.SetCharacter((spriteWidth - 1) - i, j, sprite.GetCharacter(i, j));
+				mirrored.SetColor((spriteWidth - 1) - i, j, sprite.GetColor(i, j));
+			}
+		}
+
+		sprite.Copy(mirrored);
+	}
+
+	void LoadSprite()
+	{
+		//Load sprite from file
+		Sprite result(sprToLoad);
+
+		//Carry on only if loaded sprite can fit into the canvas
+		if (result.GetWidth() > 0 && result.GetWidth() < canvasWidth && result.GetHeight() > 0 && result.GetHeight() < canvasHeight)
+		{
+			//Update sprite information
+			spriteWidth = result.GetWidth();
+			spriteHeight = result.GetHeight();
+
+			spriteHalfX = (int)((float)spriteWidth / 2.0f + 0.5f);
+			spriteHalfY = (int)((float)spriteHeight / 2.0f + 0.5f);
+
+			sprite.Copy(result);
+		}
+	}
+
 };
 
 int main()

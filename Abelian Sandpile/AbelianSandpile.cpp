@@ -63,6 +63,14 @@ class AbelianSandpile : public ConsoleGameEngine
 
 		return true; 
 	}
+
+	bool OnDestroy()
+	{
+		delete[] currentSandpile;
+		delete[] nextSandpile;
+
+		return true;
+	}
 };
 
 int main()
