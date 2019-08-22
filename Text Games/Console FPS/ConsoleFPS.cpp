@@ -132,7 +132,7 @@ int main()
 							}
 						}
 
-						sort(p.begin(), p.end(), [](const pair<float, float> &left, const pair<float, float> &right) {return left.first < right.first; });
+						sort(p.begin(), p.end(), [](const pair<float, float> &left, const pair<float, float> &right) { return left.first < right.first; });
 
 						float fBound = 0.01f;
 						if (acos(p.at(0).second) < fBound) bBoundary = true;
