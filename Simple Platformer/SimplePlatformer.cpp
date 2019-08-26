@@ -358,7 +358,15 @@ class SimplePlatformer : public ConsoleGameEngine
 			}
 		}
 
-		objects.remove_if([](const Object* obj) { return obj->destroyed; });
+		//We're only using objects from our list, so if we want to remove it, we can also safely deallocate it as nothing else will ever use it.
+		//This problem is usually solved by using smart pointers, but I wanted to use raw pointers for this simple project.
+		objects.remove_if([](const Object* obj) {
+			if (obj->destroyed)
+			{
+				delete obj;
+			}
+			return obj->destroyed;
+		});
 
 		//Draw background
 		Fill(0, 0, GetScreenWidth() * GetScreenHeight(), L' ', BG_CYAN);
