@@ -57,6 +57,8 @@ class SimplePlatformer : public ConsoleGameEngine
 		//Objects may want to use the engine's methods
 		ConsoleGameEngine *engine;
 
+		virtual ~Object() {}
+
 		float x, y;
 
 		bool solid;
