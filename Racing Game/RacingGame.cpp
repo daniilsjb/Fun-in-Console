@@ -12,7 +12,7 @@ class RacingGame : public ConsoleGameEngine
 	float currentCurvature = 0.0f;	//Current track section's curvature
 	float trackCurvature = 0.0f;	//Track's accumulated curvature
 	float totalDistance = 0.0f;		//Total length of the track
-	std::vector<std::pair<float, float>> track;
+	std::vector<std::pair<float, float>> track;		//Each track section consists of curvature and length
 
 	//Lap information
 	int currentLap = 0;
