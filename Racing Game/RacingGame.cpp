@@ -61,7 +61,7 @@ class RacingGame : public ConsoleGameEngine
 		else
 			speed -= 1.0f * elapsedTime;
 
-		//Let player steer the car. To account for inertia, it's harder to turn with higher speed
+		//Let player steer the car. Naturally, it's harder to turn with higher speed
 		int direction = 0;
 		if (GetKey(VK_LEFT).held)
 		{
@@ -108,7 +108,7 @@ class RacingGame : public ConsoleGameEngine
 		float curvatureStep = (targetCurvature - currentCurvature) * elapsedTime * speed;
 		currentCurvature += curvatureStep;
 
-		//Add accumulate track curvature
+		//Accumulate track curvature
 		trackCurvature += (currentCurvature) * elapsedTime * speed;
 
 		//Draw sky
