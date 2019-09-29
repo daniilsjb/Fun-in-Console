@@ -12,6 +12,13 @@ class SpriteEditor : public ConsoleGameEngine
 	int canvasStart;
 
 	short brushColor = BG_WHITE;
+	short brushCharacter = ' ';
+
+	const int SPRITE_MIN = 1;
+	const int SPRITE_MAX = 64;
+
+	const int COLOR_SIZE = 5;
+	const int HUES_COUNT = 6;
 
 	bool OnStart() override
 	{
@@ -25,8 +32,8 @@ class SpriteEditor : public ConsoleGameEngine
 		spriteWidth = 16;
 		spriteHeight = 16;
 
-		//Canvas dimensions get generated relative to screen dimensions
-		canvasStart = GetScreenWidth() / 4;
+		//Canvas starts where the palette ends
+		canvasStart = COLOR_SIZE * HUES_COUNT + HUES_COUNT;
 
 		canvasCenterX = ((GetScreenWidth() - canvasStart) / 2) + canvasStart;
 		canvasCenterY = GetScreenHeight() / 2;
@@ -34,26 +41,36 @@ class SpriteEditor : public ConsoleGameEngine
 		canvasWidth = GetScreenWidth() - canvasStart;
 		canvasHeight = GetScreenHeight();
 
-		//Create sprite to draw into if given dimensions are valid
-		if (spriteWidth < 1 || spriteWidth > canvasWidth || spriteHeight < 1 || spriteHeight > canvasHeight)
-			return false;
+		//Clamp sprite dimensions to make sure they are valid
+		if (spriteWidth < SPRITE_MIN) spriteWidth = SPRITE_MIN;
+		if (spriteHeight < SPRITE_MIN) spriteHeight = SPRITE_MIN;
 
-		spriteHalfX = (int)((float)spriteWidth / 2.0f + 0.5f);
-		spriteHalfY = (int)((float)spriteHeight / 2.0f + 0.5f);
+		if (spriteWidth > SPRITE_MAX) spriteWidth = SPRITE_MAX;
+		if (spriteHeight > SPRITE_MAX) spriteHeight = SPRITE_MAX;
+
+		spriteHalfX = (int)((float)spriteWidth * 0.5f + 0.5f);
+		spriteHalfY = (int)((float)spriteHeight * 0.5f + 0.5f);
 
 		sprite.Create(spriteWidth, spriteHeight);
 
+		//We need to remove one pixel from our color dimensions because width and height are added after the first pixel
+		//when rendering the palette
+		int colorHeight = COLOR_SIZE - 1;
+		int colorWidth = COLOR_SIZE - 1;
+
 		//Draw the palette
-		int colorHeight = GetScreenHeight() / 16;
-		short color = 0;
+		//The palette consists of 16 colors, and the editor supports a number of hues for each color
+		//All of this could be done in a nested 'for' loop, however it's much easier to select appropriate shading this way
 		for (int i = 0; i < 16; i++)
 		{
-			DrawFilledRectangle(0, i * colorHeight, canvasStart - 2, i * colorHeight + colorHeight, ' ', color);
-			color += 16;
+			//Colors are offset to create an outline between them
+			DrawFilledRectangle(0 * colorWidth + 0, i * colorHeight + (i * 2), 1 * colorWidth + 0, (i + 1) * colorHeight + (i * 2), PIXEL_QUARTER, i);
+			DrawFilledRectangle(1 * colorWidth + 2, i * colorHeight + (i * 2), 2 * colorWidth + 2, (i + 1) * colorHeight + (i * 2), PIXEL_HALF, i);
+			DrawFilledRectangle(2 * colorWidth + 4, i * colorHeight + (i * 2), 3 * colorWidth + 4, (i + 1) * colorHeight + (i * 2), PIXEL_THREEQUARTERS, i);
+			DrawFilledRectangle(3 * colorWidth + 6, i * colorHeight + (i * 2), 4 * colorWidth + 6, (i + 1) * colorHeight + (i * 2), PIXEL_SOLID, i);
+			DrawFilledRectangle(4 * colorWidth + 8, i * colorHeight + (i * 2), 5 * colorWidth + 8, (i + 1) * colorHeight + (i * 2), ' ', i * 16);
+			DrawFilledRectangle(5 * colorWidth + 10, i * colorHeight + (i * 2), 6 * colorWidth + 10, (i + 1) * colorHeight + (i * 2), PIXEL_THREEQUARTERS, i | BG_WHITE);
 		}
-
-		//Draw the line to indicate separation between canvas and palette
-		DrawLine(canvasStart - 1, 0, canvasStart - 1, GetScreenHeight() - 1, ' ', BG_GRAY);
 
 		return true;
 	}
@@ -66,7 +83,10 @@ class SpriteEditor : public ConsoleGameEngine
 			if (GetMouseX() >= canvasCenterX - spriteHalfX && GetMouseX() < canvasCenterX + spriteHalfX &&
 				GetMouseY() >= canvasCenterY - spriteHalfY && GetMouseY() < canvasCenterY + spriteHalfY)
 			{
-				sprite.SetColor(GetMouseX() - canvasCenterX + spriteHalfX, GetMouseY() - canvasCenterY + spriteHalfY, brushColor);
+				int sprX = GetMouseX() - canvasCenterX + spriteHalfX;
+				int sprY = GetMouseY() - canvasCenterY + spriteHalfY;
+				sprite.SetColor(sprX, sprY, brushColor);
+				sprite.SetCharacter(sprX, sprY, brushCharacter);
 			}
 		}
 
@@ -74,7 +94,10 @@ class SpriteEditor : public ConsoleGameEngine
 		{
 			//If the mouse is within palette boundaries, change brush color
 			if (GetMouseX() < canvasStart - 1)
+			{
 				brushColor = GetScreenColor(GetMouseX(), GetMouseY());
+				brushCharacter = GetScreenCharacter(GetMouseX(), GetMouseY());
+			}
 		}
 
 		if (GetKey(VK_RIGHT).pressed)
@@ -116,16 +139,16 @@ class SpriteEditor : public ConsoleGameEngine
 
 		//Draw boundaries if they fit into the canvas
 		if (spriteWidth < canvasWidth - 1)
-			DrawLine(leftX, topY, leftX, bottomY, ' ', BG_DARK_GRAY);
+			DrawLine(leftX, topY, leftX, bottomY, ' ', BG_WHITE);
 
 		if (spriteWidth < canvasWidth)
-			DrawLine(rightX, topY, rightX, bottomY, ' ', BG_DARK_GRAY);
+			DrawLine(rightX, topY, rightX, bottomY, ' ', BG_WHITE);
 
 		if (spriteHeight < canvasHeight - 1)
-			DrawLine(leftX, topY, rightX, topY, ' ', BG_DARK_GRAY);
+			DrawLine(leftX, topY, rightX, topY, ' ', BG_WHITE);
 
 		if (spriteHeight < canvasHeight)
-			DrawLine(leftX, bottomY, rightX, bottomY, ' ', BG_DARK_GRAY);
+			DrawLine(leftX, bottomY, rightX, bottomY, ' ', BG_WHITE);
 
 		//Draw the sprite onto the canvas
 		DrawSprite(canvasCenterX - spriteHalfX, canvasCenterY - spriteHalfY, sprite);
@@ -232,7 +255,7 @@ class SpriteEditor : public ConsoleGameEngine
 int main()
 {
 	SpriteEditor editor;
-	if (editor.ConstructScreen(128, 64, 8, 8))
+	if (editor.ConstructScreen(156, 96, 8, 8))
 		editor.Start();
 
 	return 0;
