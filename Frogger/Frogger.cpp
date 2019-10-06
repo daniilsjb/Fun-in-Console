@@ -274,63 +274,64 @@ class Frogger : public ConsoleGameEngine
 				collided = obj;
 		}
 
-		//See if player has reached the finish row
-		if (playerY >= 0 && playerY < waterStart)
+		//Now we may update player's state if they are alive
+		if (!playerDead)
 		{
-			//Find the finish cell they are touching
-			Finish* finish = TouchedFinish();
-			if (finish != nullptr)
+			//See if player has reached the finish row
+			if (playerY >= 0 && playerY < waterStart)
 			{
-				if (finish->occupied || finish->fly)
+				//Find the finish cell they are touching
+				Finish* finish = TouchedFinish();
+				if (finish != nullptr)
 				{
-					//Collided with an already occupied cell or a fly, so it's a game over
-					playerDead = true;
-				}
-				else
-				{
-					//Use this cell
-					finish->occupied = true;
-					finishedCount++;
+					if (finish->occupied || finish->fly)
+					{
+						//Collided with an already occupied cell or a fly, so it's a game over
+						playerDead = true;
+					}
+					else
+					{
+						//Use this cell
+						finish->occupied = true;
+						finishedCount++;
 
-					//Occupied cells are moved to the end to make it easier for fly to choose an unoccupied cell
-					std::partition(finishCells.begin(), finishCells.end(), [](const Finish* f) { return !f->occupied; });
+						//Occupied cells are moved to the end to make it easier for fly to choose an unoccupied cell
+						std::partition(finishCells.begin(), finishCells.end(), [](const Finish* f) { return !f->occupied; });
 
-					//Naturally, player has won if every cell has been occupied
-					if (finishedCount == finishCells.size())
-						playerWon = true;
+						//Naturally, player has won if every cell has been occupied
+						if (finishedCount == finishCells.size())
+							playerWon = true;
 
-					ResetPlayer();
+						ResetPlayer();
+					}
 				}
 			}
-		}
-		else if (playerY >= waterStart && playerY < waterEnd)
-		{
-			//Player is within the water region
-			if (collided != nullptr)
+			else if (playerY >= waterStart && playerY < waterEnd)
 			{
-				//Move with the log if player is on top of one
-				if (!playerDead)
+				//Player is within the water region
+				if (collided != nullptr)
 				{
+					//Move with the log if player is on top of one
 					playerX += collided->type->velocity * elapsedTime;
 
 					//The player dies if they were fully taken outside the screen. RIP.
 					if (playerX < -16 || playerX > GetScreenWidth())
 						playerDead = true;
-				}	
+				}
+				else
+				{
+					//Otherwise the player has drowned, the game is over
+					playerDead = true;
+				}
 			}
-			else
+			else if (playerY >= roadStart && playerY < roadEnd)
 			{
-				//Otherwise the player has drowned, the game is over
-				playerDead = true;
-			}
-		}
-		else if (playerY >= roadStart && playerY < roadEnd)
-		{
-			//Player is within the road region
-			if (collided != nullptr)
-			{
-				//Car has hit a player, so it's a game over
-				playerDead = true;
+				//Player is within the road region
+				if (collided != nullptr)
+				{
+					//Car has hit a player, so it's a game over
+					playerDead = true;
+				}
 			}
 		}
 
